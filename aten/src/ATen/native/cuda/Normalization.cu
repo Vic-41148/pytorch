@@ -439,6 +439,20 @@ std::tuple<Tensor&, Tensor&, Tensor&> batch_norm_cuda_out(const Tensor& self, co
   TORCH_CHECK_VALUE(has_running_mean == has_running_var,
     "running_mean and running_var must either both be None or neither be None");
 
+  const int64_t n_input = self.size(1);
+  if (has_running_mean) {
+    TORCH_CHECK(
+        running_mean_opt->numel() == n_input,
+        "running_mean should contain ", n_input,
+        " elements, got ", running_mean_opt->numel());
+  }
+  if (has_running_var) {
+    TORCH_CHECK(
+        running_var_opt->numel() == n_input,
+        "running_var should contain ", n_input,
+        " elements, got ", running_var_opt->numel());
+  }
+
   if (train) {
     batch_norm_mean_var(self, save_mean, save_invstd);
     if (has_running_mean) {
